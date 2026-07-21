@@ -30,7 +30,7 @@ GPUS_PER_NODE="${SLURM_GPUS_ON_NODE:-4}"
 # LOAD="+load_checkpoint=${CKPT}/step_XXXXX"   # <-- uncomment to resume
 LOAD=""
 
-srun --environment=trm bash -c "
+bash "$(dirname "$0")/_srun.sh" bash -c "
   source ${TRM_VENV}/bin/activate
   torchrun --nproc_per_node=${GPUS_PER_NODE} --nnodes=1 \
       --rdzv_backend=c10d --rdzv_endpoint=localhost:0 \

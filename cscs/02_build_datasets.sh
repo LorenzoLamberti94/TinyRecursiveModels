@@ -1,16 +1,19 @@
 #!/bin/bash
 # ============================================================================
-# 02 — Build datasets. MUST run on a LOGIN NODE (compute nodes have no internet;
-# this step downloads from HuggingFace). Uses the container so numpy/hf/pydantic
-# are available without polluting your login environment:
+# 02 — Build datasets. Needs HuggingFace access (dataset download). Run it where
+# there IS internet on your system — typically a login node, or the debug
+# partition if compute nodes on Alps can reach HF. The venv already has the
+# light deps (numpy/hf/pydantic); no GPU needed. Just activate it directly:
 #
 #   source cscs/config.sh
-#   srun -A $CSCS_ACCOUNT -p debug -t 00:20:00 --nodes=1 --ntasks=1 \
-#        --environment=trm bash cscs/02_build_datasets.sh
+#   source $TRM_VENV/bin/activate
+#   bash cscs/02_build_datasets.sh
 #
-# NOTE: if compute nodes on your system DO reach the internet, you can run this
-# under the debug partition as shown. If neither login nor compute has HF access,
-# pre-download the datasets elsewhere and copy them into $TRM_DATA.
+# The venv links the base's libs, so torch import needs the base active. If the
+# import fails on a bare login node, run this under the base instead:
+#   bash cscs/_srun.sh bash cscs/02_build_datasets.sh   (debug partition)
+# If neither login nor compute reaches HF, pre-download elsewhere and copy the
+# built folders into $TRM_DATA.
 # ============================================================================
 set -euo pipefail
 source "$(dirname "$0")/config.sh"

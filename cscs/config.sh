@@ -7,7 +7,20 @@
 # ----------------------------- EDIT ME -------------------------------------
 export CSCS_ACCOUNT="a-XXXX"          # your SLURM project account (sacctmgr / `id`)
 export CSCS_USER="${USER}"            # your CSCS username
-# NGC PyTorch image for aarch64/GH200. Pick a recent tag; 25.04 ships torch 2.7.
+
+# Which sudo-free base provides PyTorch on the GH200 nodes. Both are rootless
+# (NEITHER is docker). Pick one:
+#   uenv      -> CSCS-native software stack (container-free)   [default]
+#   container -> Container Engine + NGC image (needs ~/.edf/trm.toml)
+export TRM_BACKEND="uenv"
+
+# --- if TRM_BACKEND=uenv: pick a PyTorch uenv. List options with:
+#       uenv image find                (then `uenv image pull <name>`)
+#     Names are versioned/site-specific — verify against `uenv image find`.
+export TRM_UENV="pytorch/v2.6.0"      # e.g. pytorch/v2.6.0 (check available)
+export TRM_UENV_VIEW="default"        # the view that exposes torch (often 'default')
+
+# --- if TRM_BACKEND=container: NGC PyTorch image for aarch64/GH200 (25.04 ~ torch 2.7)
 export TRM_IMAGE="nvcr.io#nvidia/pytorch:25.04-py3"
 # ---------------------------------------------------------------------------
 
