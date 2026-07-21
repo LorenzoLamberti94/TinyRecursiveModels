@@ -18,7 +18,7 @@
 #
 # Submit:  sbatch -A <account> cscs/train_arc1.sbatch
 set -euo pipefail
-source "$(dirname "$0")/config.sh"
+source "$SLURM_SUBMIT_DIR/cscs/config.sh"
 source "${TRM_VENV}/bin/activate"
 cd "${TRM_ROOT}"
 
@@ -30,7 +30,7 @@ GPUS_PER_NODE="${SLURM_GPUS_ON_NODE:-4}"
 # LOAD="+load_checkpoint=${CKPT}/step_XXXXX"   # <-- uncomment to resume
 LOAD=""
 
-bash "$(dirname "$0")/_srun.sh" bash -c "
+bash "$SLURM_SUBMIT_DIR/cscs/_srun.sh" bash -c "
   source ${TRM_VENV}/bin/activate
   python -m torch.distributed.run --nproc_per_node=${GPUS_PER_NODE} --nnodes=1 \
       --rdzv_backend=c10d --rdzv_endpoint=localhost:0 \

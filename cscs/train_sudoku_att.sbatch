@@ -14,4 +14,4 @@ export RUN_NAME="pretrain_att_sudoku"
 export DATA_SUBDIR="sudoku-extreme-1k-aug-1000"
 export TRM_ARCH_ARGS="arch.H_cycles=3 arch.L_cycles=6"
 
-bash "$(dirname "$0")/_srun.sh" bash "$(dirname "$0")/_train.sh"
+bash "$SLURM_SUBMIT_DIR/cscs/_srun.sh" bash "$SLURM_SUBMIT_DIR/cscs/_train.sh"
