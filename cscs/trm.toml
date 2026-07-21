@@ -1,0 +1,25 @@
+# Container Engine environment definition file (EDF) for TRM on Alps/GH200.
+# Copy to ~/.edf/trm.toml and edit the image line if you imported a local squashfs.
+# Reference from srun with:  srun --environment=trm ...
+#
+# Using the NGC image directly (the container engine will pull/cache it). If your
+# site requires a pre-imported squashfs, set image to that absolute .sqsh path,
+# e.g.  image = "/capstor/scratch/cscs/<user>/images/pytorch-25.04.sqsh"
+
+image = "nvcr.io#nvidia/pytorch:25.04-py3"
+
+# Mount scratch and home so the venv, datasets, and repo are visible inside.
+mounts = [
+    "/capstor",
+    "/users",
+]
+
+workdir = "/capstor"
+
+writable = true
+
+[annotations]
+com.hooks.aws_ofi_nccl.enabled = "true"   # fast NCCL over Slingshot; drop if unsupported
+
+[env]
+NCCL_DEBUG = "WARN"
