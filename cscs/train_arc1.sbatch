@@ -32,7 +32,7 @@ LOAD=""
 
 bash "$(dirname "$0")/_srun.sh" bash -c "
   source ${TRM_VENV}/bin/activate
-  torchrun --nproc_per_node=${GPUS_PER_NODE} --nnodes=1 \
+  python -m torch.distributed.run --nproc_per_node=${GPUS_PER_NODE} --nnodes=1 \
       --rdzv_backend=c10d --rdzv_endpoint=localhost:0 \
       pretrain.py \
       arch=trm \
