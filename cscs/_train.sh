@@ -14,7 +14,10 @@ echo ">>> ${RUN_NAME} | ${GPUS_PER_NODE} GPUs | data=${DATA_SUBDIR} | $(date)"
 
 # global_batch_size is left at the config default (768) -> effective batch is
 # identical to the paper regardless of GPU count (split across ranks in-code).
-torchrun \
+# NOTE: use `python -m torch.distributed.run`, NOT the `torchrun` binary — the
+# uenv/container torchrun shebang points at the base interpreter and bypasses
+# this venv overlay (ModuleNotFoundError: coolname). `python` here is the venv.
+python -m torch.distributed.run \
     --nproc_per_node="${GPUS_PER_NODE}" --nnodes=1 \
     --rdzv_backend=c10d --rdzv_endpoint=localhost:0 \
     pretrain.py \
