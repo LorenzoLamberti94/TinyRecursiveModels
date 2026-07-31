@@ -115,4 +115,12 @@ EVAL_RESULT_JSON {"all": {"accuracy": 0.9583, "exact_accuracy": 0.8875, ...}}
   `all_config.yaml`. Defaults are `pos_encodings=rope`, `mlp_t=False`.
 - **Batch size** only affects eval speed/memory, not accuracy: `512` fits 16 GB
   for Sudoku; use `128` for Maze (seq_len 900).
-- **First ~1-2 min** is `torch.compile`; set `DISABLE_COMPILE=1` to skip it.
+- **First ~1-2 min** is `torch.compile`. Do **not** set `DISABLE_COMPILE=1` to skip
+  it: the checkpoints were saved from a compiled model, so their keys carry the
+  `_orig_mod.` prefix. Without compile the model has no such prefix and loading
+  fails with `Missing key(s) ... Unexpected key(s) _orig_mod....`.
+- **The last checkpoint is not always the best.** These runs use
+  `lr_min_ratio=1.0`, i.e. a *constant* LR (no decay), and accuracy can peak and
+  then fall. Maze, for instance, hit 21.2% at step 45,570 but only 9.6% at its
+  final step 65,100. When evaluating your own run, sweep the saved `step_*` files
+  rather than trusting the last one.
