@@ -11,14 +11,14 @@ runs one evaluation pass from a saved checkpoint.
 |---|---|---|---|---|
 | `pretrained/sudoku_mlp/step_65100` | Sudoku-Extreme, MLP | **88.75%** | ~87% ±2% | ✅ replicates |
 | `pretrained/sudoku_att/step_65100` | Sudoku-Extreme, attention | **66.43%** | ~75% ±2% | ~9 pts short |
-| `pretrained/maze/step_390620` | Maze-Hard (1-GPU) | **0.0%** (token 96.1%) | ~85% | ✗ did not converge |
 
-The two Sudoku models were trained on CSCS Alps GH200 with the paper's full
-`global_batch_size=768`. Maze used the 1-GPU `bs=128` recipe (the paper's 4-GPU
-`bs=768` maze run hit a NCCL desync on our cluster) and **failed to learn exact
-solutions** — 96% per-cell accuracy but essentially no fully-correct mazes; the
-`step_390620` weights are included for completeness/reproduction of that
-negative result. Each dir ships `all_config.yaml` (the exact training config).
+Both models were trained on CSCS Alps GH200 with the paper's full
+`global_batch_size=768`. Each dir ships `all_config.yaml` (the exact training
+config).
+
+No Maze-Hard checkpoint is published yet: our 4-GPU `bs=768` maze run hit a NCCL
+desync on the cluster, and the 1-GPU `bs=128` fallback reached 96% per-cell but
+~0% whole-maze accuracy, i.e. it did not converge. Maze is being retrained.
 
 The numbers above were reproduced by evaluating these checkpoints on badile13
 (RTX 4070 Ti, 16 GB) with the commands below — the MLP result matched the
@@ -86,12 +86,11 @@ $VENV/bin/python eval_only.py arch=trm \
 # Sudoku — attention  (=> ~0.6643): drop mlp_t / pos_encodings (defaults: rope, mlp_t=False)
 #   ... arch.L_layers=2 arch.H_cycles=3 arch.L_cycles=6 \
 #   +load_checkpoint=$PWD/pretrained/sudoku_att/step_65100
-
-# Maze-Hard  (=> ~0.0 exact): note L_cycles=4
-#   ... data_paths=[/scratch/$USER/dataset/maze-30x30-hard-1k] \
-#   arch.L_layers=2 arch.H_cycles=3 arch.L_cycles=4 \
-#   +load_checkpoint=$PWD/pretrained/maze/step_390620
 ```
+
+Once a Maze checkpoint exists, evaluate it the same way with
+`data_paths=[.../maze-30x30-hard-1k]`, `arch.L_cycles=4`, and
+`global_batch_size=128` (seq_len is 900).
 
 ## 4. Read the result
 
