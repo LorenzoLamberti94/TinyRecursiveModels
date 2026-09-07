@@ -11,8 +11,9 @@ runs one evaluation pass from a saved checkpoint.
 |---|---|---|---|---|
 | `pretrained/sudoku_mlp/step_65100` | Sudoku-Extreme, MLP | **88.75%** | ~87% ±2% | ✅ replicates |
 | `pretrained/sudoku_att/step_195300` | Sudoku-Extreme, attention | **73.21%** | ~75% ±2% | ✅ replicates (needs LR decay — see note) |
+| *(not published)* | Maze-Hard | 17.80% | ~85% | ❌ does not replicate — see note |
 
-Both models were trained on CSCS Alps GH200 with the paper's full
+The two published models were trained on CSCS Alps GH200 with the paper's full
 `global_batch_size=768`. Each dir ships `all_config.yaml` (the exact training
 config).
 
@@ -24,9 +25,26 @@ cosine LR decay (`lr_min_ratio=0.1`) and training longer (`epochs=150000`) gives
 replicated at 88.75% unchanged. (See `pretrained/sudoku_att/README.md` for the
 checkpoint-sweep evidence.)
 
-No Maze-Hard checkpoint is published yet: with the constant-LR default it peaks
-~21% then collapses; with LR decay it is stable but only ~20% (still far from the
-paper's ~85%), so Maze remains unresolved and is being retrained.
+**Maze-Hard does not replicate, and the LR-decay fix does not rescue it.** No
+checkpoint is published. With the constant-LR default it peaks ~21% then
+collapses. Applying the same recipe that fixed attention Sudoku
+(`lr_min_ratio=0.1`, `epochs=150000`, `global_batch_size=768`, 15.5 h on 4x
+GH200) removes the collapse but plateaus at **17.8%** vs the paper's ~85%.
+Checkpoint sweep of that run (evaluated on badile13):
+
+| Step | exact-acc | per-token acc | q_halt acc |
+|---|---|---|---|
+| 65,100 | 7.50% | 95.88% | 92.80% |
+| 130,200 | 17.30% | 95.98% | 37.30% |
+| 169,260 | 14.90% | 95.89% | 32.60% |
+| **195,300** (final) | **17.80%** | 95.96% | 37.90% |
+
+The failure signature is consistent: ~96% of individual cells are right but only
+~18% of whole mazes. The model learns the maze background (walls/open space
+dominate the 900 tokens) and rarely gets an entire path exactly right. The ACT
+halting head is also poorly calibrated (`q_halt` accuracy falls to ~37% as exact
+accuracy rises), i.e. it does not know when it is finished. So Maze fails for a
+*different* reason than the attention-Sudoku variant did, and remains open.
 
 The numbers above were reproduced by evaluating these checkpoints on badile13
 (RTX 4070 Ti, 16 GB) with the commands below — the MLP result matched the
